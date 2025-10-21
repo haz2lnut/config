@@ -1,0 +1,14 @@
+services:
+  ike:
+    build: ./ike
+    image: docks/ike
+    container_name: docks-ike
+    working_dir: /workspace
+    privileged: true
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_MODULE
+      - SYS_PTRACE
