@@ -46,7 +46,6 @@ keebuild() {
   command cp -a $CONFIG_PATH/keymap $KEYMAP_PATH
   sudo qmk flash -kb keyboardio/atreus -km haz2lnut
   command rm -rf $KEYMAP_PATH
-  sudo rm -rf $QMK_PATH/.build
   popd
 }
 

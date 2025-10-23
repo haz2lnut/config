@@ -20,6 +20,7 @@ import signal
 from dataclasses import dataclass, field, fields
 import statistics
 import sys
+from itertools import permutations
 
 @dataclass
 class Score:
@@ -548,24 +549,19 @@ def optimize_swap(base_layout: Layout, temperature, fix=0):
 
 	return Layout(letters)
 
-def optimize_all_swap(base_layout: Layout, best=True):
-	letters = [row[:] for row in base_layout.letters]
-	positions = [(r, c) for r in range(3) for c in range(10) if letters[r][c] != ' ']
+def optimize_all_swap(base_layout: Layout, letters: list[str]):
+	layouts = []
+	l = [row[:] for row in base_layout.letters]
 
-	layouts = [base_layout.clone()]
+	positions = [(r, c) for r in range(3) for c in range(10) if base_layout.letters[r][c] in letters]
 
-	for i in range(len(positions)):
-		r1, c1 = positions[i]
-		for j in range(i + 1, len(positions)):
-			r2, c2 = positions[j]
-			l = [row[:] for row in letters]
-			l[r1][c1], l[r2][c2] = l[r2][c2], l[r1][c1]
-			layouts.append(Layout(l))
+	for perm in permutations(letters, len(letters)):
+		for (r, c), ch in zip(positions, perm):
+			l[r][c] = ch
+		layouts.append(Layout(l))
+		layouts = sort_layouts(layouts)[:BEST_SIZE]
 
-	if best:
-		return best_layout(layouts)
-	else:
-		return sort_layouts(layouts)
+	return best_layout(layouts)
 
 def optimize_sa(base_layout: Layout, max_iter=10000, initial_temp=50.0, cooling_rate=0.9985, max_unimproved=2000):
 	best = base_layout.clone()
@@ -660,7 +656,8 @@ def optimize_worker(layout: Layout, progress):
 	elif r < thresholds[1]:
 		return optimize_effort(layout)
 	elif r < thresholds[2]:
-		return optimize_all_swap(layout)
+		letters = random.sample(list(LETTERS.keys()), 7)
+		return optimize_all_swap(layout, letters)
 	else:
 		return layout
 
@@ -720,11 +717,6 @@ if __name__ == '__main__':
 		else:
 			best = []
 
-		print('similar')
-		res = optimize_all_swap(best[3], False)
-		for i in range(5):
-			print_layout(res[i])
-
 		print(f'[Optimize]')
 		unimproved = 0
 		cur = [l.clone() for l in best]
@@ -750,8 +742,9 @@ if __name__ == '__main__':
 				candy = best
 
 		print(f'\r\033[K...Done')
-		save_best_result(best, result_path)
 
+		best = sort_unique_layouts(best)
+		save_best_result(best, result_path)
 		for i, l in enumerate(best, 1):
 			print(f'[{i}]')
 			print_layout(l)

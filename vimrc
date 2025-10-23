@@ -43,8 +43,10 @@ let g:NERDTreeQuitOnOpen=1
 let g:NERDTreeMinimalUI=1
 let g:NERDTreeRespectWildIgnore=1
 let g:NERDTreeShowHidden=1
+let g:NERDTreeMapOpenSplit=''
 let g:NERDTreeMapOpenVSplit=''
 let g:NERDTreeMapOpenInTab=''
+let g:NERDTreeMapOpenExpl=''
 " Start NERDTree when Vim is started without file arguments.
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
@@ -231,43 +233,45 @@ noremap I <C-u>
 noremap n l
 noremap N w
 " Mode
-noremap e i
-noremap E I
+noremap a i
+noremap A a
 noremap r s
 noremap R R
 " Operation
-noremap m c
-noremap M C
+noremap e c
+noremap E C
 noremap c y
 noremap C Y
 " Motion
+noremap q t
+noremap Q T
 noremap k n
 noremap K N
 " Etc
-noremap w :w<CR>
 noremap f za
 noremap F zR
-noremap q @
-noremap Q q
-noremap j :join!<CR>
-noremap J :.-1join!<CR>
+noremap m @
+noremap M q
+noremap z :join!<CR>
+noremap Z :.-1join!<CR>
 noremap y "
 noremap Y :registers<CR>
 noremap U <C-r>
-noremap l :call CycleList('l', 'n')<CR>
-noremap L :call CycleList('l', 'p')<CR>
+noremap j :call CycleList('l', 'n')<CR>
+noremap J :call CycleList('l', 'p')<CR>
 noremap b g;
 noremap B g,
-noremap <Space> o<Esc>
+noremap l o<Esc>
 noremap ( [(
 noremap ) ])
-noremap < [{
-noremap > ]}
+noremap { [{
+noremap } ]}
 noremap ; %
 noremap + <C-a>
 noremap - <C-x>
 noremap h <Plug>(YCMHover)
 noremap H :noh<CR>
+noremap w :w<CR>
 
 " Cursor
 call Mapmap('<Leader><Left>',  '<C-w>h')
@@ -296,8 +300,8 @@ call Mapmap('<Leader>\|', '<C-w>\|')
 " List
 call Mapmap('<Leader>t', ':call ToggleList("l")<CR>')
 call Mapmap('<Leader>i', ':call ToggleList("c")<CR>')
-call Mapmap('<Leader>l', ':call CycleList("c","n")<CR>')
-call Mapmap('<Leader>L', ':call CycleList("c","p")<CR>')
+call Mapmap('<Leader>j', ':call CycleList("c","n")<CR>')
+call Mapmap('<Leader>J', ':call CycleList("c","p")<CR>')
 " YCM
 call Mapmap('<Leader>p', ':YcmCompleter GoToAlternateFile<CR>')
 call Mapmap('<Leader>r', ':YcmCompleter GoToReferences<CR>:call AfterYcm()<CR>')

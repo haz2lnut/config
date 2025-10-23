@@ -55,9 +55,9 @@ static void usb_soft_attach(void) {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[_HZ2LUT] = LAYOUT(
-			KC_B,    KC_M,    KC_A,    KC_L,    _______,                   _______, KC_W,    KC_D,    KC_G,    KC_V,
+			KC_W,    KC_M,    KC_A,    KC_P,    _______,                   _______, KC_Y,    KC_D,    KC_H,    KC_B,
 			KC_S,    KC_T,    KC_I,    KC_N,    _______,                   _______, KC_E,    KC_R,    KC_O,    KC_C,
-			KC_Q,    KC_K,    KC_X,    KC_F,    _______, L0CK,    L0CK,    _______, KC_U,    KC_P,    KC_H,    KC_Y,
+			KC_Q,    KC_K,    KC_X,    KC_F,    _______, L0CK,    L0CK,    _______, KC_U,    KC_L,    KC_G,    KC_V,
 			OS_LGUI, OS_LALT, OS_LCTL, KC_BSPC, LOWER,   LANG1,   LANG2,   RAISE,   OS_RSFT, OS_RCTL, OS_RALT, OS_RGUI
 			),
 
