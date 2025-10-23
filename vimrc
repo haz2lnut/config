@@ -13,6 +13,7 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'tpope/vim-surround'
 Plugin 'ycm-core/YouCompleteMe'
 Plugin 'sheerun/vim-polyglot'
+Plugin 'preservim/tagbar'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
@@ -34,6 +35,7 @@ autocmd BufRead,BufNewFIle *.s setlocal filetype=asm
 set autowriteall
 autocmd BufLeave,BufWinLeave,InsertLeave,CmdlineEnter * if &filetype != 'nerdtree' && &modifiable && filereadable(bufname('%')) | silent! w | endif
 set backspace=indent,eol,start
+let g:sidebar_width = max([25, winwidth(0) / 5])
 
 
 "
@@ -43,8 +45,11 @@ let g:NERDTreeQuitOnOpen=1
 let g:NERDTreeMinimalUI=1
 let g:NERDTreeRespectWildIgnore=1
 let g:NERDTreeShowHidden=1
+let g:NERDTreeMapOpenSplit=''
 let g:NERDTreeMapOpenVSplit=''
 let g:NERDTreeMapOpenInTab=''
+let g:NERDTreeMapOpenExpl=''
+let g:NERDTreeWinSize = g:sidebar_width
 " Start NERDTree when Vim is started without file arguments.
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
@@ -214,101 +219,7 @@ autocmd InsertLeave,WinLeave * if exists('w:last_fdm') | let &l:foldmethod=w:las
 
 
 "
-" Mapping
+" Tagbar
 "
-let mapleader=','
-function! Mapmap(lhs, rhs)
-  execute 'map '.a:lhs.' '.a:rhs
-  execute 'imap '.a:lhs.' <Esc>'.a:rhs
-endfunction
-" Cursor
-noremap s h
-noremap S b
-noremap t j
-noremap T <C-d>
-noremap i k
-noremap I <C-u>
-noremap n l
-noremap N w
-" Mode
-noremap e i
-noremap E I
-noremap r s
-noremap R R
-" Operation
-noremap m c
-noremap M C
-noremap c y
-noremap C Y
-" Motion
-noremap k n
-noremap K N
-" Etc
-noremap w :w<CR>
-noremap f za
-noremap F zR
-noremap q @
-noremap Q q
-noremap j :join!<CR>
-noremap J :.-1join!<CR>
-noremap y "
-noremap Y :registers<CR>
-noremap U <C-r>
-noremap l :call CycleList('l', 'n')<CR>
-noremap L :call CycleList('l', 'p')<CR>
-noremap b g;
-noremap B g,
-noremap <Space> o<Esc>
-noremap ( [(
-noremap ) ])
-noremap < [{
-noremap > ]}
-noremap ; %
-noremap + <C-a>
-noremap - <C-x>
-noremap h <Plug>(YCMHover)
-noremap H :noh<CR>
-
-" Cursor
-call Mapmap('<Leader><Left>',  '<C-w>h')
-call Mapmap('<Leader><Right>', '<C-w>l')
-call Mapmap('<Leader><Up>',    '<C-w>k')
-call Mapmap('<Leader><Down>',  '<C-w>j')
-call Mapmap('<PageUp>',        '<C-b>')
-call Mapmap('<PageDown>',      '<C-f>')
-" Window
-call Mapmap('<Leader>q', ':wqall<CR>')
-call Mapmap('<Leader>C', '<C-w>c')
-call Mapmap('<Leader>v', ':vsplit<CR>')
-call Mapmap('<Leader>h', ':split<CR>')
-" Buffer
-call Mapmap('<Leader>c', ':call CloseBuf()<CR>')
-call Mapmap('<Leader>e', ':bprevious<CR>')
-call Mapmap('<Leader>o', ':bnext<CR>')
-" Sizing
-call Mapmap('<Leader>+', '<C-w>5+')
-call Mapmap('<Leader>-', '<C-w>5-')
-call Mapmap('<Leader><', '<C-w>5<')
-call Mapmap('<Leader>>', '<C-w>5>')
-call Mapmap('<Leader>=', '<C-w>=')
-call Mapmap('<Leader>_', '<C-w>_')
-call Mapmap('<Leader>\|', '<C-w>\|')
-" List
-call Mapmap('<Leader>t', ':call ToggleList("l")<CR>')
-call Mapmap('<Leader>i', ':call ToggleList("c")<CR>')
-call Mapmap('<Leader>l', ':call CycleList("c","n")<CR>')
-call Mapmap('<Leader>L', ':call CycleList("c","p")<CR>')
-" YCM
-call Mapmap('<Leader>p', ':YcmCompleter GoToAlternateFile<CR>')
-call Mapmap('<Leader>r', ':YcmCompleter GoToReferences<CR>:call AfterYcm()<CR>')
-call Mapmap('<Leader>g', ':YcmCompleter GoTo<CR>')
-call Mapmap('<Leader>f', '<Plug>(YCMFindSymbolInWorkspace)')
-" Nerdtree
-call Mapmap('<Leader>s', ':NERDTreeToggle<CR>')
-let g:NERDTreeMenuUp='i'
-let g:NERDTreeMenuDown='t'
-let g:NERDTreeMapRefresh='s'
-let g:NERDTreeMapCustomOpen='n'
-" Etc
-call Mapmap('<Leader>b', '<C-o>')
-call Mapmap('<Leader>B', '<C-i>')
+let g:tagbar_width = g:sidebar_width
+let g:tagbar_autofocus = 1

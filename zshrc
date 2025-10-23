@@ -37,23 +37,6 @@ update() {
   omz update
 }
 
-keebuild() {
-  QMK_PATH=$HOME/.qmk
-  KEYMAP_PATH=$QMK_PATH/keyboards/keyboardio/atreus/keymaps/haz2lnut
-
-  pushd $QMK_PATH
-  git pull
-  command cp -a $CONFIG_PATH/keymap $KEYMAP_PATH
-  sudo qmk flash -kb keyboardio/atreus -km haz2lnut
-  command rm -rf $KEYMAP_PATH
-  sudo rm -rf $QMK_PATH/.build
-  popd
-}
-
-keebedit() {
-  vi $CONFIG_PATH/keymap
-}
-
 mkvenv() {
   python -m venv $CONFIG_PATH/venv/$1
   source $CONFIG_PATH/venv/$1/bin/activate
