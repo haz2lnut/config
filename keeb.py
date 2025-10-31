@@ -125,17 +125,19 @@ BEST_SIZE = 5
 
 LETTERS = Counter()
 BIGRAMS = Counter()
+SYMBOLS = Counter()
+SYMBOL_BIGRAMS = Counter()
 
 EFFORT_GRID = [
-	[3.0, 2.4, 2.0, 2.2, 5.0, 5.0, 2.2, 2.0, 2.4, 3.0],
-	[1.6, 1.3, 1.1, 1.0, 4.0, 4.0, 1.0, 1.1, 1.3, 1.6],
-	[3.2, 2.6, 2.3, 1.6, 5.0, 5.0, 1.6, 2.3, 2.6, 3.2],
+	[5.0, 3.0, 2.4, 2.0, 2.2, 2.2, 2.0, 2.4, 3.0, 5.0],
+	[9.0, 1.5, 1.3, 1.1, 1.0, 1.0, 1.1, 1.3, 1.5, 9.0],
+	[9.0, 3.2, 2.6, 2.3, 1.6, 1.6, 2.3, 2.6, 3.2, 9.0],
 ]
 
 FINGER_GRID = [
-	[4, 3, 2, 1, 1, 5, 5, 6, 7, 8],
-	[4, 3, 2, 1, 1, 5, 5, 6, 7, 8],
-	[4, 3, 2, 1, 1, 5, 5, 6, 7, 8],
+	[4, 4, 3, 2, 1, 5, 6, 7, 8, 8],
+	[4, 4, 3, 2, 1, 5, 6, 7, 8, 8],
+	[4, 4, 3, 2, 1, 5, 6, 7, 8, 8],
 ]
 
 SCORE_RATES = Score(
@@ -164,27 +166,20 @@ def sort_layouts(layouts: list[Layout]):
 	layouts.sort(key=layout_key, reverse=True)
 	return layouts
 
-def sort_unique_layouts(layouts: list[Layout], size=BEST_SIZE, unique_text='cdy'):
-	def same_pos(a, b, u):
-		for x in u:
-			ra, ca = next((r, c) for r, row in enumerate(a.letters) for c, ch in enumerate(row) if ch == x)
-			rb, cb = next((r, c) for r, row in enumerate(b.letters) for c, ch in enumerate(row) if ch == x)
-			if (ra, ca) != (rb, cb):
-				return False
-		return True
-
+def sort_unique_layouts(layouts: list[Layout], size=BEST_SIZE):
 	layouts = sort_layouts(list(set(layouts)))
-	unique = []
+	result = []
 
 	for layout in layouts:
-		if len(unique) == size:
+		if len(result) == size:
 			break
-		if any(all(r1[::-1] == r2 for r1, r2 in zip(layout.letters, o.letters))
-				 or same_pos(layout, o, unique_text) for o in unique):
+		if any(ch in layout.letters[1][:4] for ch in 'cyd'):
 			continue
-		unique.append(layout)
+		if any(layout.letters[1][:4] == o.letters[1][:4] for o in result):
+			continue
+		result.append(layout)
 
-	return unique
+	return result
 
 def init_score_state():
 	global SCORE_MEDIAN, SCORE_IQR 
@@ -263,8 +258,16 @@ def save_analyze_result(result_path):
 		for bg, count in BIGRAMS.most_common():
 			f.write(f'{bg}\t{count}\n')
 
+		f.write('\nsymbol\tfrequency\n')
+		for ch, count in SYMBOLS.most_common():
+			f.write(f'{ch}\t{count}\n')
+
+		f.write('\nsymbigram\tfrequency\n')
+		for bg, count in SYMBOL_BIGRAMS.most_common():
+			f.write(f'{bg}\t{count}\n')
+
 def load_analysis_result(result_path):
-	global LETTERS, BIGRAMS
+	global LETTERS, BIGRAMS, SYMBOLS, SYMBOL_BIGRAMS
 
 	file_path = os.path.join(result_path, ANALYZE_RESULT_FILENAME)
 
@@ -280,6 +283,12 @@ def load_analysis_result(result_path):
 			elif line.startswith('bigram\t'):
 				section = 'bigrams'
 				continue
+			elif line.startswith('symbol\t'):
+				section = 'symbols'
+				continue
+			elif line.startswith('symbigram\t'):
+				section = 'symbigrams'
+				continue
 
 			if section == 'letters':
 				ch, count = line.split('\t')
@@ -287,14 +296,24 @@ def load_analysis_result(result_path):
 			elif section == 'bigrams':
 				bg, count = line.split('\t')
 				BIGRAMS[bg] = int(count)
+			elif section == 'symbols':
+				ch, count = line.split('\t')
+				SYMBOLS[ch] = int(count)
+			elif section == 'symbigrams':
+				bg, count = line.split('\t')
+				SYMBOL_BIGRAMS[bg] = int(count)
 
 def analyze_target_single(full_path):
 	letters = Counter()
 	bigrams = Counter()
+	symbols = Counter()
+	symbol_bigrams = Counter()
 	pattern = re.compile('[a-z]+', re.IGNORECASE)
+	symbol_set = set('~`!@#$%^&*()-_=+[]{}\\|;:\'",.<>/?')
 	try:
 		with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-			groups = pattern.findall(f.read())
+			text = f.read()
+			groups = pattern.findall(text)
 			for g in groups:
 				word = g.lower()
 				word = [ch for ch in word if 'a' <= ch <= 'z']
@@ -303,56 +322,107 @@ def analyze_target_single(full_path):
 				for i in range(len(word)-1):
 					if word[i] != word[i+1]:
 						bigrams[word[i] + word[i+1]] += 1
+			for ch in text:
+				if ch in symbol_set:
+					symbols[ch] += 1
+			for i in range(len(text) - 1):
+				if text[i] in symbol_set and text[i + 1] in symbol_set and text[i] != text[i + 1]:
+					symbol_bigrams[text[i] + text[i + 1]] += 1
 	except (FileNotFoundError, PermissionError, IsADirectoryError) as e:
 		print(f'Failed: {full_path} — {e}')
-	return letters, bigrams
+
+	return letters, bigrams, symbols, symbol_bigrams
 
 def analyze_target(result_path):
-	global LETTERS, BIGRAMS, TMP_PATH
+	global LETTERS, BIGRAMS, SYMBOLS, SYMBOL_BIGRAMS, TMP_PATH
 
 	targets = [
-		'https://github.com/torvalds/linux',
-		'https://github.com/opencv/opencv',
-		'https://github.com/django/django',
-		'https://github.com/facebook/react',
-		'https://github.com/microsoft/vscode',
-		'https://github.com/kubernetes/kubernetes',
-		'https://github.com/ohmyzsh/ohmyzsh',
-		'https://github.com/rails/rails',
-		'https://github.com/git/git',
-		'https://github.com/openssl/openssl',
-		'https://github.com/mirror/busybox',
-		'https://github.com/gcc-mirror/gcc',
-		'https://github.com/curl/curl',
-		'https://github.com/nginx/nginx',
-		'https://github.com/tmux/tmux',
-		'https://github.com/bminor/glibc',
-		'https://github.com/sqlite/sqlite',
-		'https://github.com/python/cpython',
-		'https://github.com/numpy/numpy',
-		'https://github.com/psf/requests',
+		'https://github.com/torvalds/linux',            # C
+		'https://github.com/opencv/opencv',             # C++
+		'https://github.com/gcc-mirror/gcc',            # C++
+		'https://github.com/llvm/llvm-project',         # C++/C
+		'https://github.com/python/cpython',            # C/Python
+		'https://github.com/numpy/numpy',               # Python/C
+		'https://github.com/django/django',             # Python
+		'https://github.com/psf/requests',              # Python
+		'https://github.com/facebook/react',            # JavaScript/TypeScript
+		'https://github.com/microsoft/vscode',          # TypeScript
+		'https://github.com/sveltejs/svelte',           # JavaScript/TypeScript
+		'https://github.com/nodejs/node',               # JavaScript/C++
+		'https://github.com/denoland/deno',             # TypeScript/Rust
+		'https://github.com/kubernetes/kubernetes',     # Go
+		'https://github.com/golang/go',                 # Go
+		'https://github.com/rust-lang/rust',            # Rust
+		'https://github.com/theseus-os/Theseus',        # Rust
+		'https://github.com/bytecodealliance/wasmtime', # Rust
+		'https://github.com/sharkdp/fd',                # Rust
+		'https://github.com/ziglang/zig',               # Zig
+		'https://github.com/vlang/v',                   # V
+		'https://github.com/nim-lang/Nim',              # Nim
+		'https://github.com/carbon-language/carbon-lang', # Carbon
+		'https://github.com/ValeLang/Vale',             # Vale
+		'https://github.com/rails/rails',               # Ruby
+		'https://github.com/elixir-lang/elixir',        # Elixir
+		'https://github.com/apple/swift',               # Swift
+		'https://github.com/JetBrains/kotlin',          # Kotlin
+		'https://github.com/php/php-src',               # PHP
+		'https://github.com/lua/lua',                   # Lua
+		'https://github.com/ghc/ghc',                   # Haskell
+		'https://github.com/scala/scala',               # Scala
+		'https://github.com/wch/r-source',              # R
+		'https://github.com/dotnet/runtime',            # C#
+		'https://github.com/java/jdk',                  # Java
+		'https://github.com/ohmyzsh/ohmyzsh',           # Shell
+		'https://github.com/copy/v86',                  # Assembly/JavaScript
+		'https://github.com/cirosantilli/x86-bare-metal-examples', # Assembly/C
+		'https://github.com/mit-pdos/xv6-public',       # C/Assembly
+		'https://github.com/redox-os/redox',            # Rust/Assembly
+		'https://github.com/SerenityOS/serenity',       # C++/Assembly
+		'https://github.com/u-boot/u-boot',             # C/Assembly
+		'https://github.com/coreboot/coreboot',         # C/Assembly
+		'https://github.com/Maratyszcza/PeachPy',       # Python/Assembly
+		'https://github.com/netwide-assembler/nasm',    # Assembly
+		'https://github.com/BeaEngine/BeaEngine',       # Assembly/C
+		'https://github.com/ApolloTeam-dev/AROS',       # C/Assembly
 	]
-	extensions = {
+
+	extensions = [
 		'.c', '.h',
-		'.cpp', '.hpp',
-		'.cc', '.hh',
-		'.s', '.S',
+		'.cpp', '.hpp', '.cc', '.hh',
+		'.ino',
 		'.cs',
 		'.java',
+		'.kt', '.kts',
+		'.scala',
+		'.groovy',
+		'.swift',
+		'.m', '.mm',
 		'.py',
-		'.js', '.ts',
+		'.rb',
+		'.js', '.jsx',
+		'.ts', '.tsx',
 		'.go',
 		'.rs',
-		'.php',
-		'.swift',
-		'.kt', '.kts',
-		'.rb',
-		'.m', '.mm',
+		'.zig',
+		'.hs',
+		'.ml', '.mli',
+		'.ex', '.exs',
+		'.erl',
 		'.sh', '.bash', '.zsh',
+		'.html', '.htm',
+		'.css', '.scss',
+		'.md', '.markdown',
+		'.json', '.yaml', '.yml', '.toml',
+		'.sql', '.proto', '.xml',
+		'.dockerfile', 'Dockerfile',
+		'.R', '.r',
+		'.jl',
+		'.php',
 		'.pl', '.pm',
 		'.lua',
-		'.md'
-	}
+		'.asm', '.s', '.S',
+		'.v', '.sv', '.vhd', '.vhdl',
+	]
 
 	# Check
 	print('[Check Target]')
@@ -389,20 +459,34 @@ def analyze_target(result_path):
 	print('[Analyze Target]')
 	letters = Counter()
 	bigrams = Counter()
+	symbols = Counter()
+	symbol_bigrams = Counter()
 	len_files = len(files)
 	with ProcessPoolExecutor() as executor:
-		for i, (l, b) in enumerate(executor.map(analyze_target_single, files), 1):
+		for i, (l, b, s, sb) in enumerate(executor.map(analyze_target_single, files), 1):
 			letters += l
 			bigrams += b
+			symbols += s
+			symbol_bigrams += sb
 			print(f'\r\033[K{i}/{len_files} ({i/len_files*100:.1f}%)', end='')
 
 	LETTERS = letters
+	SYMBOLS = symbols
 	total_count = sum(bigrams.values())
 	threshold = total_count * 0.9
 	cumulative = 0
 	for bigram, count in bigrams.most_common():
 		cumulative += count
 		BIGRAMS[bigram] = count
+		if cumulative >= threshold:
+			break
+
+	total_count = sum(symbol_bigrams.values())
+	threshold = total_count * 0.9
+	cumulative = 0
+	for bigram, count in symbol_bigrams.most_common():
+		cumulative += count
+		SYMBOL_BIGRAMS[bigram] = count
 		if cumulative >= threshold:
 			break
 
@@ -549,18 +633,20 @@ def optimize_swap(base_layout: Layout, temperature, fix=0):
 
 	return Layout(letters)
 
-def optimize_all_swap(base_layout: Layout, letters: list[str]):
+def optimize_all_swap(base_layout: Layout):
 	layouts = []
 	l = [row[:] for row in base_layout.letters]
 
+	letters = random.sample(list(LETTERS.keys()), 7)
 	positions = [(r, c) for r in range(3) for c in range(10) if base_layout.letters[r][c] in letters]
+	perms = permutations(letters, len(letters))
 
-	for perm in permutations(letters, len(letters)):
+	for perm in perms:
 		for (r, c), ch in zip(positions, perm):
 			l[r][c] = ch
 		layouts.append(Layout(l))
-		layouts = sort_layouts(layouts)[:BEST_SIZE]
 
+	layouts = sort_layouts(layouts)
 	return best_layout(layouts)
 
 def optimize_sa(base_layout: Layout, max_iter=10000, initial_temp=50.0, cooling_rate=0.9985, max_unimproved=2000):
@@ -656,8 +742,7 @@ def optimize_worker(layout: Layout, progress):
 	elif r < thresholds[1]:
 		return optimize_effort(layout)
 	elif r < thresholds[2]:
-		letters = random.sample(list(LETTERS.keys()), 7)
-		return optimize_all_swap(layout, letters)
+		return optimize_all_swap(layout)
 	else:
 		return layout
 
@@ -721,7 +806,7 @@ if __name__ == '__main__':
 		unimproved = 0
 		cur = [l.clone() for l in best]
 		candy = [make_initial_layout()]
-		while unimproved < BEST_SIZE*2:
+		while unimproved < 100:
 			cur = optimize(candy)
 
 			prev = [l.clone() for l in best]
@@ -735,6 +820,9 @@ if __name__ == '__main__':
 				unimproved = 0
 				save_best_result(best, result_path)
 				print(f'\t improved')
+				for i, l in enumerate(best, 1):
+					print(f'[{i}]')
+					print_layout(l)
 
 			if unimproved > (BEST_SIZE/2):
 				candy = [make_initial_layout()]

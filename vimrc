@@ -224,44 +224,39 @@ function! Mapmap(lhs, rhs)
   execute 'imap '.a:lhs.' <Esc>'.a:rhs
 endfunction
 " Cursor
-noremap s h
-noremap S b
-noremap t j
-noremap T <C-d>
-noremap i k
-noremap I <C-u>
-noremap n l
-noremap N w
+noremap l h
+noremap L b
+noremap i j
+noremap I <C-d>
+noremap s k
+noremap S <C-u>
+noremap t l
+noremap T w
 " Mode
-noremap a i
-noremap A a
-noremap r s
-noremap R R
+noremap e i
+noremap E I
+noremap <C-r> R
 " Operation
-noremap e c
-noremap E C
+noremap r c
+noremap R C
 noremap c y
 noremap C Y
-" Motion
-noremap q t
-noremap Q T
-noremap k n
-noremap K N
 " Etc
 noremap f za
 noremap F zR
 noremap m @
 noremap M q
-noremap z :join!<CR>
-noremap Z :.-1join!<CR>
+noremap j :join!<CR>
+noremap J :.-1join!<CR>
 noremap y "
 noremap Y :registers<CR>
 noremap U <C-r>
-noremap j :call CycleList('l', 'n')<CR>
-noremap J :call CycleList('l', 'p')<CR>
+noremap z :call CycleList('l', 'n')<CR>
+noremap Z :call CycleList('l', 'p')<CR>
 noremap b g;
 noremap B g,
-noremap l o<Esc>
+noremap <Space> o<Esc>
+noremap <BackSpace> X
 noremap ( [(
 noremap ) ])
 noremap { [{
@@ -281,14 +276,14 @@ call Mapmap('<Leader><Down>',  '<C-w>j')
 call Mapmap('<PageUp>',        '<C-b>')
 call Mapmap('<PageDown>',      '<C-f>')
 " Window
-call Mapmap('<Leader>q', ':wqall<CR>')
+call Mapmap('<Leader>w', ':wqall<CR>')
 call Mapmap('<Leader>C', '<C-w>c')
 call Mapmap('<Leader>v', ':vsplit<CR>')
 call Mapmap('<Leader>h', ':split<CR>')
 " Buffer
 call Mapmap('<Leader>c', ':call CloseBuf()<CR>')
 call Mapmap('<Leader>e', ':bprevious<CR>')
-call Mapmap('<Leader>o', ':bnext<CR>')
+call Mapmap('<Leader>a', ':bnext<CR>')
 " Sizing
 call Mapmap('<Leader>+', '<C-w>5+')
 call Mapmap('<Leader>-', '<C-w>5-')
@@ -298,21 +293,21 @@ call Mapmap('<Leader>=', '<C-w>=')
 call Mapmap('<Leader>_', '<C-w>_')
 call Mapmap('<Leader>\|', '<C-w>\|')
 " List
-call Mapmap('<Leader>t', ':call ToggleList("l")<CR>')
-call Mapmap('<Leader>i', ':call ToggleList("c")<CR>')
-call Mapmap('<Leader>j', ':call CycleList("c","n")<CR>')
-call Mapmap('<Leader>J', ':call CycleList("c","p")<CR>')
+call Mapmap('<Leader>i', ':call ToggleList("l")<CR>')
+call Mapmap('<Leader>s', ':call ToggleList("c")<CR>')
+call Mapmap('<Leader>z', ':call CycleList("c","n")<CR>')
+call Mapmap('<Leader>Z', ':call CycleList("c","p")<CR>')
 " YCM
 call Mapmap('<Leader>p', ':YcmCompleter GoToAlternateFile<CR>')
 call Mapmap('<Leader>r', ':YcmCompleter GoToReferences<CR>:call AfterYcm()<CR>')
 call Mapmap('<Leader>g', ':YcmCompleter GoTo<CR>')
 call Mapmap('<Leader>f', '<Plug>(YCMFindSymbolInWorkspace)')
 " Nerdtree
-call Mapmap('<Leader>s', ':NERDTreeToggle<CR>')
-let g:NERDTreeMenuUp='i'
-let g:NERDTreeMenuDown='t'
-let g:NERDTreeMapRefresh='s'
-let g:NERDTreeMapCustomOpen='n'
+call Mapmap('<Leader>l', ':NERDTreeToggle<CR>')
+let g:NERDTreeMenuUp='s'
+let g:NERDTreeMenuDown='i'
+let g:NERDTreeMapRefresh='l'
+let g:NERDTreeMapCustomOpen='t'
 " Etc
 call Mapmap('<Leader>b', '<C-o>')
 call Mapmap('<Leader>B', '<C-i>')

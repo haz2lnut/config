@@ -55,9 +55,9 @@ static void usb_soft_attach(void) {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[_HZ2LUT] = LAYOUT(
-			KC_W,    KC_M,    KC_A,    KC_P,    _______,                   _______, KC_Y,    KC_D,    KC_H,    KC_B,
-			KC_S,    KC_T,    KC_I,    KC_N,    _______,                   _______, KC_E,    KC_R,    KC_O,    KC_C,
-			KC_Q,    KC_K,    KC_X,    KC_F,    _______, L0CK,    L0CK,    _______, KC_U,    KC_L,    KC_G,    KC_V,
+			KC_F,    KC_U,    KC_N,    KC_G,    _______,                   _______, KC_B,    KC_D,    KC_O,    KC_V,
+			KC_L,    KC_I,    KC_S,    KC_T,    _______,                   _______, KC_E,    KC_R,    KC_A,    KC_C,
+			KC_W,    KC_Y,    KC_X,    KC_P,    _______, L0CK,    L0CK,    _______, KC_M,    KC_H,    KC_K,    KC_Z,
 			OS_LGUI, OS_LALT, OS_LCTL, KC_BSPC, LOWER,   LANG1,   LANG2,   RAISE,   OS_RSFT, OS_RCTL, OS_RALT, OS_RGUI
 			),
 
@@ -76,9 +76,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 			),
 
 	[_RAISE] = LAYOUT(
-			KC_Z,    KC_QUOT, KC_DQT,  KC_COLN, _______,                   _______, KC_HASH, KC_PERC, KC_AMPR, KC_J, 
+			KC_Q,    KC_LCBR, KC_RCBR, KC_COLN, _______,                   _______, KC_HASH, KC_PERC, KC_DQT,  KC_J,
 			KC_DOT,  KC_LPRN, KC_RPRN, KC_SCLN, _______,                   _______, KC_ESC,  KC_COMM, KC_UNDS, KC_ENT,
-			KC_LT,   KC_PLUS, KC_MINS, KC_GT,   _______, _______, _______, _______, KC_EQL,  KC_SLSH, KC_ASTR, KC_EXLM,
+			KC_LT,   KC_PLUS, KC_MINS, KC_GT,   _______, _______, _______, _______, KC_EQL,  KC_SLSH, KC_ASTR, KC_BSLS,
 			_______, _______, _______, KC_DEL,  TABADJ,  _______, _______, _______, CW_TOGG, _______, _______, _______
 			),
 
@@ -110,33 +110,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 	return true;
 }
 
-const uint16_t PROGMEM circ_combo[] = {KC_J, KC_QUOT, COMBO_END};
-const uint16_t PROGMEM grv_combo[] = {KC_QUOT, KC_DQT, COMBO_END};
-const uint16_t PROGMEM bsls_combo[] = {KC_DQT, KC_COLN, COMBO_END};
-const uint16_t PROGMEM at_combo[] = {KC_HASH, KC_PERC, COMBO_END};
-const uint16_t PROGMEM pipe_combo[] = {KC_PERC, KC_AMPR, COMBO_END};
-const uint16_t PROGMEM dlr_combo[] = {KC_AMPR, KC_Z, COMBO_END};
-const uint16_t PROGMEM lcbr_combo[] = {KC_LPRN, KC_LT, COMBO_END};
-const uint16_t PROGMEM rcbr_combo[] = {KC_RPRN, KC_GT, COMBO_END};
-const uint16_t PROGMEM lbrc_combo[] = {KC_COMM, KC_EQL, COMBO_END};
-const uint16_t PROGMEM rbrc_combo[] = {KC_UNDS, KC_EXLM, COMBO_END};
-const uint16_t PROGMEM tild_combo[] = {KC_LT, KC_PLUS, COMBO_END};
-const uint16_t PROGMEM ques_combo[] = {KC_ASTR, KC_EXLM, COMBO_END};
-const uint16_t PROGMEM zr_combo[] = {KC_COMM, KC_UNDS, COMBO_END};
+const uint16_t PROGMEM grv_combo[] = {KC_Q, KC_LCBR, COMBO_END};
+const uint16_t PROGMEM exlm_combo[] = {KC_LCBR, KC_RCBR, COMBO_END};
+const uint16_t PROGMEM ampr_combo[] = {KC_RCBR, KC_COLN, COMBO_END};
+const uint16_t PROGMEM pipe_combo[] = {KC_HASH, KC_PERC, COMBO_END};
+const uint16_t PROGMEM ques_combo[] = {KC_PERC, KC_DQT, COMBO_END};
+const uint16_t PROGMEM quot_combo[] = {KC_DQT, KC_J, COMBO_END};
+const uint16_t PROGMEM lbrc_combo[] = {KC_LCBR, KC_RPRN, COMBO_END};
+const uint16_t PROGMEM rbrc_combo[] = {KC_RCBR, KC_LPRN, COMBO_END};
+const uint16_t PROGMEM circ_combo[] = {KC_LT, KC_PLUS, COMBO_END};
+const uint16_t PROGMEM dlr_combo[] = {KC_ASTR, KC_BSLS, COMBO_END};
+const uint16_t PROGMEM at_combo[] = {KC_PERC, KC_UNDS, COMBO_END};
+const uint16_t PROGMEM tild_combo[] = {KC_DQT, KC_COMM, COMBO_END};
+const uint16_t PROGMEM zero_combo[] = {KC_COMM, KC_UNDS, COMBO_END};
 const uint16_t PROGMEM one_combo[] = {KC_COMM, KC_ASTR, COMBO_END};
+
 combo_t key_combos[] = {
-    COMBO(circ_combo, KC_CIRC),
     COMBO(grv_combo, KC_GRV),
-    COMBO(bsls_combo, KC_BSLS),
-    COMBO(at_combo, KC_AT),
+    COMBO(exlm_combo, KC_EXLM),
+    COMBO(ampr_combo, KC_AMPR),
     COMBO(pipe_combo, KC_PIPE),
-    COMBO(dlr_combo, KC_DLR),
-    COMBO(lcbr_combo, KC_LCBR),
-    COMBO(rcbr_combo, KC_RCBR),
+    COMBO(ques_combo, KC_QUES),
+    COMBO(quot_combo, KC_QUOT),
     COMBO(lbrc_combo, KC_LBRC),
     COMBO(rbrc_combo, KC_RBRC),
+    COMBO(circ_combo, KC_CIRC),
+    COMBO(dlr_combo, KC_DLR),
+    COMBO(at_combo, KC_AT),
     COMBO(tild_combo, KC_TILD),
-    COMBO(ques_combo, KC_QUES),
-    COMBO(zr_combo, KC_0),
+    COMBO(zero_combo, KC_0),
     COMBO(one_combo, KC_1),
 };
